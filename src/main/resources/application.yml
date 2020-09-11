@@ -1,0 +1,13 @@
+values:
+  default:
+    agency-length: 4
+    account-length: 6
+    left-pad-value: 0
+    
+configuration:
+   chunk-size: 5000
+   pool-size: 10
+   pool-thread: 15    
+   output-file-name: outputFile
+   output-file-extension: .csv
+   default-error-language: en-US
