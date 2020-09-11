@@ -15,6 +15,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -41,11 +42,17 @@ public class AccountUpdateService {
 	private MessageService messageService;
 	private AccountUpdateProperties properties;
 	
-	private long maxLineNumber;
+	private long maxChunkSize;
+
+	//TODO REMOVER ESTE CÓDIGO
+	/*
+	@Value("${configuration.input-file-path}")
+	private String inpufilePathNew;
+	*/
 	
 	//TODO Verificar USO dos erros com a linha
 	private ConcurrentLinkedQueue<String> erros;
-
+	
 	@Autowired
 	public AccountUpdateService(FileUtil fileUtil, 
 			DataFormatterUtils dataFormatterUtils,
@@ -62,21 +69,33 @@ public class AccountUpdateService {
 	
 	@PostConstruct
 	public void setup() {
-		maxLineNumber = properties.getMaxChunkSizeProcessPerTime();
+		maxChunkSize = properties.getMaxChunkSizeProcessPerTime();
 		erros = new ConcurrentLinkedQueue<>();
 	}
 	
 	//TODO REVER PASSAGEM DE PARÂMETRO
 	public void readAndProcessFile(String inputFilePath) {
 		LOGGER.info("================== AccountUpdateService.readFile ===> INIT");
+		//LOGGER.info("================== RUN_PARAMETER ===> {}", inpufilePathNew);
 
 		//TODO REMOVER ESTE CÒDIGO
 		inputFilePath = "C:\\Users\\Vini\\Documents\\vini_test\\teste.csv";
+		
+		/*
+		 * 1 - O LOAD DO CSV PODERIA SER FEITO TAMBÉM COM MULTITHREAD CASO A ORDEM NÃO SEJA NECESSÁRIA; 
+		 * 2 - O LOAD DO CSV PODERIA TAMBÉM SER FEITO DE UMA VEZ, TRANSFORMANDO TODAS AS LINHAS DO ARQUIVO 
+		 *     EM STRING DE DADOS OU LISTA DE STRINGS PARA EVITAR UMA IOEXCEPTION DURANTE O PROCESSAMENTO;
+		 * */
 		CSVParser inputDataCsvParser = fileUtil.getInputCsvFile(inputFilePath);
 		
 		if ( Objects.nonNull(inputDataCsvParser) ) {
 			LOGGER.info("================== AccountUpdateService.readFile ===> FILE: {} FOUND. INITIALIZIN READING", inputFilePath);
 			
+			/*
+			 * A CRIACAO DO ARQUIVO DE SAÍDA PODERIA SER FEITA DE FORMA ASSÍNCRONA COM @Async E UMA VALIDAÇÃO DESTA CRIAÇÃO
+			 * SERIA FEITA ANTES DE ESCREVER NESTE ARQUIVO, CASO HOUVESSE ALGUM PROBLEMA NA CRIAÇÃO, A EXECUÇÃO SERIA
+			 * INTERROMPIDA
+			 * */
 			String fullOutputFilePath = fileUtil.createOutPutFile(properties.getOutputFileName(), properties.getOutputFileExtension(), Boolean.TRUE);
 			
 			if ( Strings.isNullOrEmpty(fullOutputFilePath) ) {
@@ -95,16 +114,24 @@ public class AccountUpdateService {
 	private void processCsvLine(CSVParser inputDataCsvParser, String fullOutputFilePath) {
 		List<AccountInfoDTO> accountsToUpdate = new ArrayList<>();
 		
+		/*
+		 * CASO A ORDEM DOS REGISTROS NÃO FOSSEM IMPORTANTES PODERÍAMOS
+		 * EXECUTAR A LEITURA DE UMA LISTA THREAD SAFE EM MULTITHREAD
+		 * AO INVÉS SÓ DO PROCESSAMENTO DO RESULTADO
+		 * 
+		 * */
 		for (CSVRecord csvRecord : inputDataCsvParser) {
 			
+			Long currentLineNumber = inputDataCsvParser.getCurrentLineNumber();
+			
 			//Skipping header line
-			if ( inputDataCsvParser.getCurrentLineNumber() == 1 ) {
+			if ( currentLineNumber.equals(Long.valueOf(1)) ) {
 				continue;
 			}
 			
 			this.buildAccountInfoDTOAndAddToUpdateList(csvRecord, accountsToUpdate, inputDataCsvParser.getCurrentLineNumber());
 			
-			if ( inputDataCsvParser.getCurrentLineNumber() == maxLineNumber 
+			if ( currentLineNumber == maxChunkSize 
 					|| !inputDataCsvParser.iterator().hasNext() ) {
 				
 				Queue<AccountInfoDTO> processedDataFutures = new ConcurrentLinkedQueue<>();
@@ -118,9 +145,11 @@ public class AccountUpdateService {
 					LOGGER.error("STACK TRACE: {}", Arrays.toString(e.getStackTrace()));
 				}
 				
-				this.writeOutputFile(fullOutputFilePath, processedDataFutures);
+				if ( !processedDataFutures.isEmpty() ) {
+					this.writeOutputFile(fullOutputFilePath, processedDataFutures);
+				}
 				
-				maxLineNumber += maxLineNumber;
+				maxChunkSize = currentLineNumber += properties.getMaxChunkSizeProcessPerTime();
 				accountsToUpdate.clear();
 			}
 		}

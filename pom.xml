@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>br.com.company</groupId>
 	<artifactId>account-update-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>account-update-service</name>
-	<description>Project to update account status</description>
+	<description>Project to update account status into central bank integration</description>
 
 	<properties>
 		<java.version>1.8</java.version>

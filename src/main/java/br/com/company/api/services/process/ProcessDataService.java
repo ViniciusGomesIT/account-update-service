@@ -64,4 +64,18 @@ public class ProcessDataService {
 		
 		return accountLock;
 	}
+	
+	private AccountLock removeAccountLock(AccountLock accountLock) {
+		accountLock = accountsInProcessAccountLocks.get(accountLock.getAccountLockId());
+		
+		if ( Objects.nonNull(accountLock) 
+				&& accountLock.isLocked() ) {
+			
+			accountLock.unlock();
+			
+			accountsInProcessAccountLocks.put(accountLock.getAccountLockId(), accountLock);
+		}
+		
+		return accountLock;
+	}
 }

@@ -1,5 +1,7 @@
 package br.com.company.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -12,11 +14,9 @@ import br.com.company.api.services.account.AccountUpdateService;
 @SpringBootApplication
 public class AccountUpdateServiceApplication {
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AccountUpdateServiceApplication.class);
+	
 	public static void main(String[] args) {
-		//TODO REMOVER ESTE CÒDIGO
-		//TODO FAZER O SHUTDOWN DA APLICAÇÂO APÒS A EXECUÇÂO
-		//SpringApplication.run(AccountUpdateServiceApplication.class, args);
-
 		SpringApplication application = new SpringApplication(AccountUpdateServiceApplication.class);
 		ApplicationContext applicationContext = application.run(args);
 		
@@ -24,6 +24,13 @@ public class AccountUpdateServiceApplication {
 		
 		//TODO REVER A PASSAGEM DE PARÂMETRO
 		accountUpdateService.readAndProcessFile(args[0]);
+		
+		LOGGER.info("====================");
+		LOGGER.info("PROCESS DONE... SHUTTING DOWN");
+		LOGGER.info("====================");
+		
+		SpringApplication.exit(applicationContext);
+		System.exit(0);
 	}
 	
 	@Bean
