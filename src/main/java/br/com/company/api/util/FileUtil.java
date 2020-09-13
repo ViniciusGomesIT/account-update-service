@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Objects;
+import java.util.Queue;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -18,16 +20,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
+
+import br.com.company.api.contants.Constants;
+import br.com.company.api.dto.AccountInfoDTO;
 import br.com.company.api.enums.OutputFileHeadersEnum;
 import br.com.company.api.services.message.MessageService;
 
 @Component
 public class FileUtil {
-
-	private static final String PATH_SEPARATOR = "/";
-	private static final String NEW_LINE_FUNCTION = "\n";
-	private static final String DEFAULT_TIME_STAMP_PATTERN = "dd_MM_yyyy_HH_mm_ss";
-	private static final String CSV_SEPARATOR = ";";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 	
@@ -61,14 +62,16 @@ public class FileUtil {
 	public String createOutPutFile(String outputFileName, String outputFileExtension, boolean withTimeStamp) {
 		File outputFile = null;
 		
+		LOGGER.info("===================== FileUtil.createOutPutFile ===> INIT");
+		
 		try {
 			String filePath = System.getProperty("user.dir")
-					.concat(PATH_SEPARATOR)
+					.concat(Constants.PATH_SEPARATOR)
 					.concat(outputFileName);
 			
 			if ( withTimeStamp ) {
 				filePath = filePath.concat("_")
-					.concat( new SimpleDateFormat(DEFAULT_TIME_STAMP_PATTERN).format(new Date()) );
+					.concat( new SimpleDateFormat(Constants.DEFAULT_TIME_STAMP_PATTERN).format(new Date()) );
 			}
 			
 			filePath = filePath.concat(outputFileExtension);
@@ -80,6 +83,8 @@ public class FileUtil {
 				this.writeCsvHeader(outputFile.getAbsolutePath());
 			}
 			
+			LOGGER.info("===================== FileUtil.createOutPutFile ===> END ===> OUTPUT FILE CREATED AT: {}", outputFile.getAbsolutePath());
+			
 		} catch (Exception e) {
 			LOGGER.error("=============================================================");
 			LOGGER.error(messageService.getMessage("error.creating.output.csv.file"));
@@ -88,7 +93,10 @@ public class FileUtil {
 			LOGGER.error("=============================================================");
 		}
 		
-		return outputFile.getAbsolutePath();
+		
+		return Objects.nonNull(outputFile)
+				? outputFile.getAbsolutePath()
+				: Constants.EMPTY_STRING;
 	}
 
 	private void writeCsvHeader(String absolutePath) {
@@ -96,16 +104,64 @@ public class FileUtil {
 		
 		Arrays.stream(OutputFileHeadersEnum.values())
 			.sorted(Comparator.comparingInt(OutputFileHeadersEnum::getHeaderOrder))
-			.forEach(value -> stringBuffer.append(value.getHeaderName().concat(CSV_SEPARATOR)));
+			.forEach(value -> stringBuffer.append(value.getHeaderName().concat(Constants.CSV_SEPARATOR)));
 		
-		this.writeInOutputFile(absolutePath, stringBuffer.toString());
+		this.writeFile(absolutePath, stringBuffer.toString());
 	}
 
-	public void writeInOutputFile(String outputFilePath, String message) {
+	/*
+	 * A escrita do CSV poderia ser feita de forma Assíncrona com @Async 
+	 * caso não seja necessário manter a ordem de execução
+	 * */
+	public void writeOutputFile(String fullFileNamePath, Queue<AccountInfoDTO> accountsProcessed) {
+		LOGGER.info("================== AccountUpdateService.writeOutFile ===> INIT");
+		
+		StringBuilder outputDataBuilder = new StringBuilder();
+		
+		LOGGER.info("================== AccountUpdateService.writeOutFile ===> BUILDING INFORMATION ===> INIT");
+		accountsProcessed.parallelStream()
+			.forEachOrdered(processedAccountInfo -> this.buildOutputData(outputDataBuilder, processedAccountInfo));
+		LOGGER.info("================== AccountUpdateService.writeOutFile ===> BUILDING INFORMATION ===> DONE");
+		
+		
+		LOGGER.info("================== AccountUpdateService.writeOutFile ===> WRITING OUTPUTFILE ===> INIT");
+		this.writeFile(fullFileNamePath, outputDataBuilder.toString());
+		LOGGER.info("================== AccountUpdateService.writeOutFile ===> WRITING OUTPUTFILE ===> DONE");
+
+		
+		LOGGER.info("================== AccountUpdateService.writeOutFile ===> END");
+	}
+	
+	private void buildOutputData(StringBuilder outputDataBuilder, AccountInfoDTO processedAccountInfo) {
+		AccountInfoDTO accountInfoDTO = processedAccountInfo;
+		
+		if ( outputDataBuilder.length() > 0 ) {
+			outputDataBuilder.append(Constants.NEW_LINE_FUNCTION);
+		}
+		
+		outputDataBuilder.append(accountInfoDTO.getAgencia());
+		outputDataBuilder.append(Constants.CSV_SEPARATOR);
+		outputDataBuilder.append(accountInfoDTO.getConta());
+		outputDataBuilder.append(Constants.CSV_SEPARATOR);
+		outputDataBuilder.append(accountInfoDTO.getSaldo());
+		outputDataBuilder.append(Constants.CSV_SEPARATOR);
+		outputDataBuilder.append(accountInfoDTO.getStatus());
+		outputDataBuilder.append(Constants.CSV_SEPARATOR);
+		outputDataBuilder.append(accountInfoDTO.getProcessedStatus());
+		outputDataBuilder.append(Constants.CSV_SEPARATOR);
+		
+		String error =  Strings.isNullOrEmpty(accountInfoDTO.getProcessError()) 
+				? Constants.DEFAULT_ERROR_MESSAGE 
+				: accountInfoDTO.getProcessError();
+		
+		outputDataBuilder.append(error);
+	}
+	
+	public void writeFile(String outputFilePath, String message) {
 		try ( BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath, Boolean.TRUE)) ) {
 			
 			writer.append(message);
-			writer.append(NEW_LINE_FUNCTION);
+			writer.append(Constants.NEW_LINE_FUNCTION);
 			
 	    } catch (Exception e) {
 	    	LOGGER.error("==============================================");

@@ -1,5 +1,7 @@
 package br.com.company.api.util;
 
+import java.util.Queue;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,5 +55,13 @@ public class DataFormatterUtils {
 		} 
 		
 		return null;
+	}
+	
+	public String formatErrors(Queue<String> errors) {
+		StringBuilder builder = new StringBuilder();
+		
+		errors.forEach( error -> builder.append(error).append(Constants.NEW_LINE_FUNCTION) );
+		
+		return builder.toString();
 	}
 }

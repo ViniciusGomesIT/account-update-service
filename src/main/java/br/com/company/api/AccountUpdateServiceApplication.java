@@ -9,7 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
-import br.com.company.api.services.account.AccountUpdateService;
+import br.com.company.api.services.account.impl.AccountUpdateServiceImpl;
 
 @SpringBootApplication
 public class AccountUpdateServiceApplication {
@@ -20,9 +20,8 @@ public class AccountUpdateServiceApplication {
 		SpringApplication application = new SpringApplication(AccountUpdateServiceApplication.class);
 		ApplicationContext applicationContext = application.run(args);
 		
-		AccountUpdateService accountUpdateService = applicationContext.getBean(AccountUpdateService.class);
+		AccountUpdateServiceImpl accountUpdateService = applicationContext.getBean(AccountUpdateServiceImpl.class);
 		
-		//TODO REVER A PASSAGEM DE PARÂMETRO
 		accountUpdateService.readAndProcessFile(args[0]);
 		
 		LOGGER.info("====================");

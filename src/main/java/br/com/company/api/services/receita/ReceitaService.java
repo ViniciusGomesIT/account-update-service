@@ -3,8 +3,6 @@ package br.com.company.api.services.receita;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 /**
  * @author gabriel_stabel<gabriel_stabel@sicredi.com.br>
  */
@@ -15,7 +13,6 @@ public class ReceitaService {
     public boolean atualizarConta(String agencia, String conta, double saldo, String status)
             throws RuntimeException, InterruptedException {
 		
-			
         // Formato agencia: 0000
         if (agencia == null || agencia.length() != 4) {
             return false;
@@ -36,7 +33,7 @@ public class ReceitaService {
         if (status == null || !tipos.contains(status)) {
             return false;
         }
-
+        
         // Simula tempo de resposta do serviço (entre 1 e 5 segundos)
         long wait = Math.round(Math.random() * 4000) + 1000;
         Thread.sleep(wait);
@@ -46,7 +43,7 @@ public class ReceitaService {
         if (randomError == 500) {
             throw new RuntimeException("Error");
         }
-
+        
         return true;
     }
 }
