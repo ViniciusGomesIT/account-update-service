@@ -17,7 +17,6 @@ public class AccountInfoCallableServiceImpl implements Callable<AccountInfoDTO>,
 		this.receitaService = new ReceitaService();
 	}
 	
-	
 	@Override
 	public AccountInfoDTO call() throws Exception {
 		return sendCentralBankUpdateIntegrationUpdateIntegration(accountInfoDTO);

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+import br.com.company.api.contants.Constants;
 import br.com.company.api.properties.AccountUpdateProperties;
 
 @Service
@@ -21,7 +22,7 @@ public class MessageService {
 	}
 
 	public String getMessage(String key)  {
-		return getMessage(key, "");
+		return getMessage(key, Constants.EMPTY_STRING);
 	}
 	
 	public String getMessage(String key, String... args) {

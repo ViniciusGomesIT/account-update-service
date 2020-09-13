@@ -17,8 +17,6 @@ public class ThreadPoolExecutorConfig {
 	
 	@Bean(name = "taskExecutor")
     public ExecutorService getAsyncExecutor() {
-        ExecutorService executor = Executors.newFixedThreadPool(properties.getThreadPoolLength());
-       
-        return executor;
+        return Executors.newFixedThreadPool(properties.getThreadPoolLength());
     }
 }

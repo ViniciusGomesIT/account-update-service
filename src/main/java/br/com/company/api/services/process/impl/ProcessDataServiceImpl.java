@@ -34,7 +34,6 @@ public class ProcessDataServiceImpl implements ProcessDataService {
 	private MessageService messageService;
 	private ConcurrentHashMap<String, AccountLock> accountsInProcessAccountLocks;
 	private FileUtil fileUtil;
-	private AccountUpdateProperties properties;
 	
 	@Qualifier(value = "taskExecutor")
 	private ExecutorService executor;
@@ -44,12 +43,10 @@ public class ProcessDataServiceImpl implements ProcessDataService {
 			 MessageService messageService,
 			 FileUtil fileUtil,
 			 AccountUpdateProperties properties,
-			 ExecutorService executor
-			 ) {
+			 ExecutorService executor) {
 		
 		this.messageService = messageService;
 		this.fileUtil = fileUtil;
-		this.properties = properties;
 		this.executor = executor;
 	}
 
