@@ -43,8 +43,8 @@ public class FileUtil {
 		if ( !Strings.isNullOrEmpty(csfFileName) ) {
 			File csvFile = new File(csfFileName);
 			
-			try(FileInputStream fileInputStream = new FileInputStream(csvFile)) {
-				
+			try {
+				FileInputStream fileInputStream = new FileInputStream(csvFile);
 				csvParser = CSVFormat.EXCEL.withDelimiter(';').parse(new InputStreamReader(fileInputStream));
 				
 			} catch (IOException e) {

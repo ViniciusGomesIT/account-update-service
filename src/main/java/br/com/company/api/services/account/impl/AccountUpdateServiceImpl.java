@@ -67,6 +67,12 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 	
 	@Override
 	public void readAndProcessFile(String inputFilePath) {
+		LOGGER.info("===========================================================");
+		LOGGER.info("CONFIGURATION:");
+		LOGGER.info("Thread Pool Length: {}", properties.getThreadPoolLength());
+		LOGGER.info("Chunk Size: {}", properties.getMaxChunkSizeProcessPerTime());
+		LOGGER.info("===========================================================");
+		
 		LOGGER.info("================== AccountUpdateService.readFile ===> INIT");
 		
 		/*

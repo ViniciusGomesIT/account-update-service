@@ -5,8 +5,8 @@ values:
     left-pad-value: 0
     
 configuration:
-   chunk-size: 5
-   pool-thread: 50
+   chunk-size: 200
+   pool-thread: 10
    output-file-name: outputFile
    output-file-extension: .csv
    default-error-language: en-US
