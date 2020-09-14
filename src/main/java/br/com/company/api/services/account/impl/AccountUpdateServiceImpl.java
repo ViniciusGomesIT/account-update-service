@@ -115,6 +115,8 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 	private void processCsvLine(CSVParser inputDataCsvParser, String fullOutputFilePath) {
 		List<AccountInfoDTO> accountsToUpdate = new ArrayList<>();
 		
+		LOGGER.info("================== AccountUpdateService.processCsvLine ===> PROCESSING INIT...");
+		
 		/*
 		 * CASO A ORDEM DOS REGISTROS NÃO FOSSEM IMPORTANTES PODERÍAMOS
 		 * EXECUTAR A LEITURA DE UMA LISTA "THREAD SAFE EM MULTITHREADING
@@ -134,7 +136,7 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 				continue;
 			}
 			
-			if ( shoulProcessAccounts(accountsToUpdate, inputDataCsvParser) ){
+			if ( shouldProcessAccounts(accountsToUpdate, inputDataCsvParser) ){
 				
 				processDataService.processAccountRegistersMultiThreading(accountsToUpdate, fullOutputFilePath);
 				
@@ -143,9 +145,11 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 			
 			}
 		}
+		
+		LOGGER.info("================== AccountUpdateService.processCsvLine ===> PROCESSING END...");
 	}
 
-	private boolean shoulProcessAccounts(List<AccountInfoDTO> accountsToUpdate, CSVParser inputDataCsvParser) {
+	private boolean shouldProcessAccounts(List<AccountInfoDTO> accountsToUpdate, CSVParser inputDataCsvParser) {
 		boolean lastExecution = !inputDataCsvParser.iterator().hasNext();
 		
 		return (accountsToUpdate.size() == maxChunkSize || lastExecution) 
