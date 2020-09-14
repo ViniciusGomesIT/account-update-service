@@ -23,6 +23,12 @@ public class AccountInfoCallableServiceImpl implements Callable<AccountInfoDTO>,
 	}
 	
 	@Override
+	/*
+	 * A comunicação com o serviço de atualização de conta poderia ser feito com FeignClient
+	 * ou com RestTamplate caso seja REST ou com Jaxb2Marshaller caso seja SOAP. Adicionando
+	 * as respectivas configurações
+	 * 
+	 * */
 	public AccountInfoDTO sendCentralBankUpdateIntegrationUpdateIntegration(AccountInfoDTO accountInfoDTO) {
 		try {
 			boolean isExecuted = receitaService.atualizarConta(

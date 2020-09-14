@@ -1,4 +1,4 @@
-package br.com.company.api.service.utils;
+package br.com.company.api.utils;
 
 import java.util.List;
 

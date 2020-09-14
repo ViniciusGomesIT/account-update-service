@@ -24,7 +24,7 @@ public class DataFormatterUtils {
 			if ( agency.length() == properties.getDefaultAgencyLength() ) {
 				return agency;
 			} else {
-				return StringUtils.leftPad( agency, (properties.getDefaultAgencyLength() - agency.length()), properties.getDefaultLeftPadValue() );
+				return StringUtils.leftPad( agency, properties.getDefaultAgencyLength(), properties.getDefaultLeftPadValue() );
 			}
 		}
 		
@@ -39,7 +39,7 @@ public class DataFormatterUtils {
 			if ( account.length() == properties.getDefaultAccountLength() ) {
 				return account;
 			} else {
-				return StringUtils.leftPad( account, (properties.getDefaultAccountLength() - account.length()), properties.getDefaultLeftPadValue() );
+				return StringUtils.leftPad( account, properties.getDefaultAccountLength(), properties.getDefaultLeftPadValue() );
 			}
 		} 
 
@@ -48,7 +48,7 @@ public class DataFormatterUtils {
 
 	public Double formatBalanceData(String balance) {
 		
-		if ( !Strings.isNullOrEmpty(properties.getDefaultLeftPadValue()) ) {
+		if ( !Strings.isNullOrEmpty(balance) ) {
 			balance = balance.replace(Constants.FROM_FILE_BALANCE_SEPARATOR, Constants.DEFAULT_BALANCE_SEPARATOR);
 			
 			return new Double(balance);

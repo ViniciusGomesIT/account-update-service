@@ -54,36 +54,39 @@ public class ProcessDataServiceImpl implements ProcessDataService {
 	public Queue<AccountInfoDTO> processAccountRegistersMultiThreading(List<AccountInfoDTO> accountsToUpdate, String fullOutputFilePath) {
 		Queue<AccountInfoDTO> accountsProcessed = new ConcurrentLinkedQueue<>();
 		
-		
-	 	//CHAMADA PARA MÉTODO COM CONTROLE DE CONCORRÊNCIA TENTATIVA DE CRIAÇÃO
-	 	//DE CONTROLE DE CONCORRÊNCIA PARA NÃO EXECUTAR UM REGISTROO<AGENCIA+CONTA>
-	 	//ANTES DO POSTEIOR NA ORDEN DE LEITURA(NÃO PROCESSAR O 5 AO INVÉS DO 1)
-		/*
-		Queue<Future<AccountInfoDTO>> futures = executeThreadPool(accountsToUpdate);
-		accountsProcessed = this.getAccountsProcessedFromFutures(futures);
-		*/
-		
-		//CÓDIGO RODANDO MULTI-THREADING SEM LOCK
-		List<Future<AccountInfoDTO>> futures = accountsToUpdate.parallelStream()
-				.map(account -> executor.submit(new AccountInfoCallableServiceImpl(account)))
-				.collect(Collectors.toList());
-				
-		for (Future<AccountInfoDTO> future : futures) {
-			try {
-				
-				accountsProcessed.add(future.get());
-				
-			} catch (InterruptedException | ExecutionException e) {
-				LOGGER.error("=============================================");
-				LOGGER.error(messageService.getMessage("error.while.trying.to.execute.integration"));
-				LOGGER.error("MESSAGE: {}", e.getMessage());
-				LOGGER.error("STACK TRACE: {}", Arrays.toString(e.getStackTrace()));
+		if ( !accountsToUpdate.isEmpty() ) {
+			//CHAMADA PARA MÉTODO COM CONTROLE DE CONCORRÊNCIA TENTATIVA DE CRIAÇÃO
+			//DE CONTROLE DE CONCORRÊNCIA PARA NÃO EXECUTAR UM REGISTROO<AGENCIA+CONTA>
+			//ANTES DO POSTEIOR NA ORDEN DE LEITURA(NÃO PROCESSAR O 5 AO INVÉS DO 1)
+			/*
+				Queue<Future<AccountInfoDTO>> futures = executeThreadPool(accountsToUpdate);
+				accountsProcessed = this.getAccountsProcessedFromFutures(futures);
+			 */
+			
+			//CÓDIGO RODANDO MULTI-THREADING SEM LOCK
+			
+			List<Future<AccountInfoDTO>> futures = accountsToUpdate.parallelStream()
+					.map(account -> executor.submit(new AccountInfoCallableServiceImpl(account)))
+					.collect(Collectors.toList());
+			
+			for (Future<AccountInfoDTO> future : futures) {
+				try {
+					
+					accountsProcessed.add(future.get());
+					
+				} catch (InterruptedException | ExecutionException e) {
+					LOGGER.error("=============================================");
+					LOGGER.error(messageService.getMessage("error.while.trying.to.execute.integration"));
+					LOGGER.error("MESSAGE: {}", e.getMessage());
+					LOGGER.error("STACK TRACE: {}", Arrays.toString(e.getStackTrace()));
+				}
+			}
+			
+			if ( !accountsProcessed.isEmpty() ) {
+				fileUtil.writeOutputFile(fullOutputFilePath, accountsProcessed);
 			}
 		}
 		
-		if ( !accountsProcessed.isEmpty() ) {
-			fileUtil.writeOutputFile(fullOutputFilePath, accountsProcessed);
-		}
 		
 		return accountsProcessed;
 	}

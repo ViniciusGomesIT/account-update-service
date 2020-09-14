@@ -19,7 +19,7 @@ public class AccountUpdateProperties {
 	private long maxChunkSizeProcessPerTime;
 	
 	@Value("${values.default.left-pad-value}")
-	private String defaultLeftPadValue;
+	private char defaultLeftPadValue;
 	
 	@Value("${configuration.default-error-language}")
 	private String defaultErrorLanguage;
@@ -46,7 +46,7 @@ public class AccountUpdateProperties {
 		return maxChunkSizeProcessPerTime;
 	}
 
-	public String getDefaultLeftPadValue() {
+	public char getDefaultLeftPadValue() {
 		return defaultLeftPadValue;
 	}
 

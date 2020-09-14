@@ -68,9 +68,6 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 	@Override
 	public void readAndProcessFile(String inputFilePath) {
 		LOGGER.info("================== AccountUpdateService.readFile ===> INIT");
-
-		//TODO REMOVER ESTE CÒDIGO
-		inputFilePath = "C:\\Users\\Vini\\Documents\\vini_test\\teste.csv";
 		
 		/*
 		 * 1 - O LOAD DO CSV PODERIA SER FEITO TAMBÉM COM MULTITHREAD CASO A ORDEM NÃO SEJA NECESSÁRIA OU
@@ -131,9 +128,7 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 				continue;
 			}
 			
-			boolean lastExecution = !inputDataCsvParser.iterator().hasNext();
-			if ( accountsToUpdate.size() == maxChunkSize 
-					|| lastExecution ) {
+			if ( shoulProcessAccounts(accountsToUpdate, inputDataCsvParser) ){
 				
 				processDataService.processAccountRegistersMultiThreading(accountsToUpdate, fullOutputFilePath);
 				
@@ -142,6 +137,13 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 			
 			}
 		}
+	}
+
+	private boolean shoulProcessAccounts(List<AccountInfoDTO> accountsToUpdate, CSVParser inputDataCsvParser) {
+		boolean lastExecution = !inputDataCsvParser.iterator().hasNext();
+		
+		return (accountsToUpdate.size() == maxChunkSize || lastExecution) 
+					&& !accountsToUpdate.isEmpty() ;
 	}
 
 	private boolean validateAndBuildInputdata(

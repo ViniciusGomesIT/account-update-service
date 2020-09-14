@@ -37,24 +37,28 @@ public class FileUtil {
 
 	public CSVParser getInputCsvFile(String csfFileName) {
 		LOGGER.info("===================== FileUtil.getInputCsvFile ===> INIT with csvFileName: {}", csfFileName);
-
-		File csvFile = new File(csfFileName);
+		
 		CSVParser csvParser = null;
-
-		try {
+		
+		if ( !Strings.isNullOrEmpty(csfFileName) ) {
+			File csvFile = new File(csfFileName);
 			
-			FileInputStream fileInputStream = new FileInputStream(csvFile);
-			csvParser = CSVFormat.EXCEL.withDelimiter(';').parse(new InputStreamReader(fileInputStream));
-
-		} catch (IOException e) {
-			LOGGER.error("=============================================================");
-			LOGGER.error(messageService.getMessage("error.getting.csv.file", csfFileName));
-			LOGGER.error("MESSAGE: {}", e.getMessage());
-			LOGGER.error("STACK TRACE: {}", Arrays.toString(e.getStackTrace()));
-			LOGGER.error("=============================================================");
+			try(FileInputStream fileInputStream = new FileInputStream(csvFile)) {
+				
+				csvParser = CSVFormat.EXCEL.withDelimiter(';').parse(new InputStreamReader(fileInputStream));
+				
+			} catch (IOException e) {
+				LOGGER.error("=============================================================");
+				LOGGER.error(messageService.getMessage("error.getting.csv.file", csfFileName));
+				LOGGER.error("MESSAGE: {}", e.getMessage());
+				LOGGER.error("STACK TRACE: {}", Arrays.toString(e.getStackTrace()));
+				LOGGER.error("=============================================================");
+			}
+			
+			LOGGER.info("===================== FileUtil.getInputCsvFile ===> returnin csvFileName: {}", csfFileName);
+		} else {
+			LOGGER.info("===================== FileUtil.getInputCsvFile ===> INIT NULL or EMPTY INPUT CSV FILE PATH, RETURNING NULL");
 		}
-
-		LOGGER.info("===================== FileUtil.getInputCsvFile ===> END with csvFileName: {}", csfFileName);
 
 		return csvParser;
 	}
