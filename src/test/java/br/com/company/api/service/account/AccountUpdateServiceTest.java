@@ -1,5 +1,6 @@
 package br.com.company.api.service.account;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,7 +63,7 @@ public class AccountUpdateServiceTest {
 		InputStream stream = this.getClass().getResourceAsStream(inputFilePath);
 		CSVParser csvParser = CSVFormat.EXCEL.withDelimiter(';').parse(new InputStreamReader(stream));
 		
-		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString()))
+		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString(),  Mockito.any(FileInputStream.class)))
 			.thenReturn(csvParser);
 		
 		BDDMockito.when(fileUtilMock.createOutPutFile(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean()))
@@ -78,7 +79,7 @@ public class AccountUpdateServiceTest {
 		String inputFilePath = "/test.csv";
 		String outputFilePath = "/test_out.csv";
 		
-		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString()))
+		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString(),  Mockito.any(FileInputStream.class)))
 			.thenReturn(null);
 		
 		BDDMockito.when(fileUtilMock.createOutPutFile(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean()))
@@ -93,7 +94,7 @@ public class AccountUpdateServiceTest {
 	public void ReadAndProcessFileWithNullInputFileTest() throws FileNotFoundException, IOException, URISyntaxException {
 		String outputFilePath = "/test_out.csv";
 		
-		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString()))
+		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString(),  Mockito.any(FileInputStream.class)))
 			.thenReturn(null);
 		
 		BDDMockito.when(fileUtilMock.createOutPutFile(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean()))
@@ -111,7 +112,7 @@ public class AccountUpdateServiceTest {
 		InputStream stream = this.getClass().getResourceAsStream("/test.csv");
 		CSVParser csvParser = CSVFormat.EXCEL.withDelimiter(';').parse(new InputStreamReader(stream));
 		
-		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString()))
+		BDDMockito.when(fileUtilMock.getInputCsvFile(Mockito.anyString(),  Mockito.any(FileInputStream.class)))
 			.thenReturn(csvParser);
 		
 		BDDMockito.when(fileUtilMock.createOutPutFile(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean()))

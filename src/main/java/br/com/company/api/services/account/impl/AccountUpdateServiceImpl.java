@@ -1,6 +1,9 @@
 package br.com.company.api.services.account.impl;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
@@ -67,6 +70,7 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 	
 	@Override
 	public void readAndProcessFile(String inputFilePath) {
+		FileInputStream fileInputStream = null;
 		LOGGER.info("===========================================================");
 		LOGGER.info("CONFIGURATION:");
 		LOGGER.info("Thread Pool Length: {}", properties.getThreadPoolLength());
@@ -82,7 +86,7 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 		 *     EM STRING DE DADOS OU LISTA DE STRINGS OU STRING BUFFER OU LISTA DE OBJETOS PARA EVITAR MITIGAR 
 		 *     AS CHANCES DE UMA IO EXCEPTION DURANTE O PROCESSAMENTO;
 		 * */
-		CSVParser inputDataCsvParser = fileUtil.getInputCsvFile(inputFilePath);
+		CSVParser inputDataCsvParser = fileUtil.getInputCsvFile(inputFilePath, fileInputStream);
 		
 		if ( Objects.nonNull(inputDataCsvParser) ) {
 			LOGGER.info("================== AccountUpdateService.readFile ===> FILE: {} FOUND. INITIALIZING PROCESSING", inputFilePath);
@@ -104,12 +108,16 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 			LOGGER.info("================== AccountUpdateService.readFile ===> File: {} NOT found, aborting...");	
 		}
 		
+		releaseResources(fileInputStream);
+		
 		if ( !errors.isEmpty() ) {
 			String errorsParsed = dataFormatterUtils.formatErrors(errors);
 			LOGGER.info("================== {}", messageService.getMessage("error.processing.data", errorsParsed));
 		} else {
 			LOGGER.info("================== AccountUpdateService.readFile ===> END WITH NO ERRORS");
 		}
+		
+		
 	}
 	
 	private void processCsvLine(CSVParser inputDataCsvParser, String fullOutputFilePath) {
@@ -199,5 +207,19 @@ public class AccountUpdateServiceImpl implements AccountUpdateService {
 		}
 		
 		return validLine;
+	}
+	
+	private void releaseResources(FileInputStream fileInputStream) {
+		if ( Objects.nonNull(fileInputStream) ) {
+			try {
+				fileInputStream.close();
+			} catch (IOException e) {
+				String message = messageService.getMessage("error.release.resource", e.getMessage());
+				LOGGER.error("==========================================================");
+				LOGGER.error(message);
+				LOGGER.error("STACK TRACE: {}", Arrays.toString(e.getStackTrace()));
+				LOGGER.error("==========================================================");
+			}
+		}
 	}
 }

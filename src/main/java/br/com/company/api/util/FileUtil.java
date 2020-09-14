@@ -35,7 +35,7 @@ public class FileUtil {
 	@Autowired
 	private MessageService messageService;
 
-	public CSVParser getInputCsvFile(String csfFileName) {
+	public CSVParser getInputCsvFile(String csfFileName, FileInputStream fileInputStream) {
 		LOGGER.info("===================== FileUtil.getInputCsvFile ===> INIT with csvFileName: {}", csfFileName);
 		
 		CSVParser csvParser = null;
@@ -44,7 +44,7 @@ public class FileUtil {
 			File csvFile = new File(csfFileName);
 			
 			try {
-				FileInputStream fileInputStream = new FileInputStream(csvFile);
+				fileInputStream = new FileInputStream(csvFile);
 				csvParser = CSVFormat.EXCEL.withDelimiter(';').parse(new InputStreamReader(fileInputStream));
 				
 			} catch (IOException e) {
