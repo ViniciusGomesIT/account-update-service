@@ -1,17 +1,13 @@
 package br.com.company.api.services.receita;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author gabriel_stabel<gabriel_stabel@sicredi.com.br>
- */
+import com.google.common.collect.Lists;
+
 public class ReceitaService {
 
-	// Esta é a implementação interna do "servico" do banco central. Veja o código fonte abaixo para ver os formatos esperados pelo Banco Central neste cenário.
-
     public boolean atualizarConta(String agencia, String conta, double saldo, String status)
-            throws RuntimeException, InterruptedException {
+            throws InterruptedException {
 		
         // Formato agencia: 0000
         if (agencia == null || agencia.length() != 4) {
@@ -24,11 +20,7 @@ public class ReceitaService {
         }
         
         // Tipos de status validos:
-        List tipos = new ArrayList();
-        tipos.add("A");
-        tipos.add("I");
-        tipos.add("B");
-        tipos.add("P");                
+        List<String> tipos = Lists.newArrayList("A", "I", "B", "P");
                 
         if (status == null || !tipos.contains(status)) {
             return false;
